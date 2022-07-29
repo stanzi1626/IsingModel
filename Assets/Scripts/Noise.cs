@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class Noise
 {
-    public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, int seed, float scale, int octaves, float persistance, float lacunarity, Vector2 offset)
+    public static float[,] GeneratePerlinNoiseMap(int mapWidth, int mapHeight, int seed, float scale, int octaves, float persistance, float lacunarity, Vector2 offset)
     {
         float[,] noiseMap = new float[mapWidth, mapHeight];
 
@@ -82,4 +82,26 @@ public static class Noise
 
         return noiseMap;
     }
+
+    public static float[,] GenerateMagMap(int mapWidth, int mapHeight)
+    {
+        float[,] noiseMap = new float[mapWidth, mapHeight];
+        System.Random rnd = new System.Random();
+        for (int i = 0; i < mapWidth; i++)
+        {
+            for (int j = 0; j < mapHeight; j++)
+            {
+                if ((float)rnd.NextDouble() < 0.5f)
+                {
+                    noiseMap[i, j] = -1;
+                }
+                else
+                {
+                    noiseMap[i, j] = 1;
+                }
+            }
+        }
+        return noiseMap;
+    }
+
 }

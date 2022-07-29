@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
-    public const int mapChunkSize = 100;
-    public float noiseScale;
+    public enum DrawMode { PerlinNoiseMap, RandomMagMap }
+    public DrawMode drawMode;
 
-    public int octaves;
+    public const int mapChunkSize = 100;
+    public float noiseScale = 20;
+
+    public int octaves = 7;
     [Range(0, 1)]
-    public float persistance;
-    public float lacunarity;
+    public float persistance = .5f;
+    public float lacunarity = 2;
     public int seed;
     public Vector2 offset;
 
@@ -18,32 +21,48 @@ public class MapGenerator : MonoBehaviour
 
     public Renderer textureRenderer;
 
+    float[,] magMap;
+
     public void DrawTexture(Texture2D texture)
     {
         textureRenderer.sharedMaterial.mainTexture = texture;
         textureRenderer.transform.localScale = new Vector3(texture.width, 1, texture.height);
     }
 
+    public void Start()
+    {
+        magMap = GenerateRandomMagMapData(); 
+    }
+
     public void DrawMapInEditor()
     {
-        MapData mapData = GenerateMapData(Vector2.zero);
-        DrawTexture(TextureGenerator.TextureFromHeightMap(mapData.heightMap));
-    }
-
-    MapData GenerateMapData(Vector2 centre)
-    {
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, centre + offset);
-        return new MapData(noiseMap);
-    }
-
-
-    public struct MapData
-    {
-        public readonly float[,] heightMap;
-
-        public MapData(float[,] heightMap)
+        if (drawMode == DrawMode.PerlinNoiseMap)
         {
-            this.heightMap = heightMap;
+            float[,] mapData = GeneratePerlinNoiseMapData(Vector2.zero);
+            DrawTexture(TextureGenerator.TextureFromHeightMap(mapData));
         }
+        else if (drawMode == DrawMode.RandomMagMap)
+        {
+            float[,] mapData = GenerateRandomMagMapData();
+            DrawTexture(TextureGenerator.TextureFromHeightMap(mapData));
+        }
+    }
+
+    public void Update()
+    {
+        magMap = MagneticEvolution.IsingStep(magMap);
+        DrawTexture(TextureGenerator.TextureFromHeightMap(magMap));
+    }
+
+    float[,] GeneratePerlinNoiseMapData(Vector2 centre)
+    {
+        float[,] noiseMap = Noise.GeneratePerlinNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, centre + offset);
+        return noiseMap;
+    }
+
+    float[,] GenerateRandomMagMapData()
+    {
+        float[,] noiseMap = Noise.GenerateMagMap(mapChunkSize, mapChunkSize);
+        return noiseMap;
     }
 }
