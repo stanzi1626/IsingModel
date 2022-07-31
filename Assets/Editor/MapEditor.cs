@@ -2,28 +2,38 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(MapGenerator))]
-public class MapGeneratorEditor : Editor
-{
+public class MapGeneratorEditor : Editor{
+    MapGenerator m;
     public override void OnInspectorGUI()
     {
-        MapGenerator mapGen = (MapGenerator)target;
-
         if (DrawDefaultInspector())
         {
-            if (mapGen.autoUpdate)
+            if (m.autoUpdate)
             {
-                mapGen.DrawMapInEditor();
+                m.DrawMapInEditor();
             }
         }
 
         if (GUILayout.Button("Generate"))
         {
-            mapGen.DrawMapInEditor();
+            m.DrawMapInEditor();
         }
 
-        //if (GUILayout.Button("Evolve"))
-        //{
-        //    mapGen.MagEvolution();
-        //}
+        if (GUILayout.Button("Evolve"))
+        {
+            var sw = new System.Diagnostics.Stopwatch ();
+            sw.Start ();
+            m.IsingModelEvolve();
+            sw.Stop ();
+            Debug.Log ($"Generated evolution history ({m.numIsingSteps} iterations; {sw.ElapsedMilliseconds}ms)");
+        }
+    }
+    void OnEnable () {
+        m = (MapGenerator) target;
+        Tools.hidden = true;
+    }
+
+    void OnDisable () {
+        Tools.hidden = false;
     }
 }

@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class MagneticEvolution : MonoBehaviour
 {
-    public static float[,] IsingStep(float[,] mapData)
+    public static float[,] IsingStep(float[,] mapData, float temperature)
     {
         System.Random rnd = new System.Random();
-        float temperature = .4f;
         int N = mapData.GetLength(0);
         for (int i = 0; i < N; i++)
         {
