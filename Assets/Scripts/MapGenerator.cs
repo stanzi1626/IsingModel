@@ -23,12 +23,19 @@ public class MapGenerator : MonoBehaviour
     [Header ("Ising Model Settings")]
     public float temperature = .4f;
     public int numIsingSteps;
-    [Range(0, 99)]
     public int numOfIsingStep;
-    public bool stepThroughIsingModel;
 
     float[,] magMap;
-    Dictionary<int, float[,]> evolutionHistory = new Dictionary<int, float[,]>(100);
+    public Dictionary<int, float[,]> evolutionHistory = new Dictionary<int, float[,]>(0);
+
+    private void OnValidate() {
+        if (numOfIsingStep >= numIsingSteps){
+            numOfIsingStep = numIsingSteps - 1;
+        } else if (numOfIsingStep < 0){
+            numOfIsingStep = 0;
+        }
+        Dictionary<int, float[,]> evolutionHistory = new Dictionary<int, float[,]>(numIsingSteps);
+    }
 
     public void DrawTexture(Texture2D texture)
     {
@@ -55,7 +62,7 @@ public class MapGenerator : MonoBehaviour
         }
         else if (drawMode == DrawMode.IsingMap)
         {
-            if (stepThroughIsingModel && evolutionHistory.Count != 0){
+            if (evolutionHistory.Count != 0){
                 DrawTexture(TextureGenerator.TextureFromHeightMap(evolutionHistory[numOfIsingStep]));
             } else {
                 float[,] mapData = GenerateRandomMagMapData();

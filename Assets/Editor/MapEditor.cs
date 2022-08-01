@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,11 +22,12 @@ public class MapGeneratorEditor : Editor{
 
         if (GUILayout.Button("Evolve"))
         {
+            m.evolutionHistory = new Dictionary<int, float[,]>(m.numIsingSteps);
             var sw = new System.Diagnostics.Stopwatch ();
             sw.Start ();
             m.IsingModelEvolve();
             sw.Stop ();
-            Debug.Log ($"Generated evolution history ({m.numIsingSteps} iterations; {sw.ElapsedMilliseconds}ms)");
+            Debug.Log ($"{sw.ElapsedMilliseconds}ms)");
         }
     }
     void OnEnable () {
