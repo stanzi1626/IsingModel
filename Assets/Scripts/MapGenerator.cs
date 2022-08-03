@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
-    public enum DrawMode { PerlinNoiseMap, IsingMap }
+    public enum DrawMode { PerlinNoiseMap, IsingMap, TemperatureMap }
+    public enum TemperatureMode {FallOffMap, HighTemperatureRightWall}
     public DrawMode drawMode;
 
     public const int mapChunkSize = 500;
@@ -21,9 +22,12 @@ public class MapGenerator : MonoBehaviour
     public Vector2 offset;
 
     [Header ("Ising Model Settings")]
-    public float temperature = .4f;
     public int numIsingSteps;
     public int numOfIsingStep;
+    
+    [Header ("Temperature Settings")]
+    public TemperatureMode temperatureMode;
+    public float temperatureMultiplier = .4f;
 
     float[,] magMap;
     public Dictionary<int, float[,]> evolutionHistory = new Dictionary<int, float[,]>(0);
@@ -49,7 +53,7 @@ public class MapGenerator : MonoBehaviour
     }
     public void Update()
     {
-        magMap = MagneticEvolution.IsingStep(magMap, temperature);
+        magMap = MagneticEvolution.IsingStep(magMap, TemperatureMap(), temperatureMultiplier);
         DrawTexture(TextureGenerator.TextureFromHeightMap(magMap));
     }
 
@@ -68,7 +72,21 @@ public class MapGenerator : MonoBehaviour
                 float[,] mapData = GenerateRandomMagMapData();
                 DrawTexture(TextureGenerator.TextureFromHeightMap(mapData));
             }
+        } else if (drawMode == DrawMode.TemperatureMap){
+            DrawTexture(TextureGenerator.TextureFromHeightMap(TemperatureMap()));
         }
+    }
+
+    public float[,] TemperatureMap(){
+
+        float[,] mapData = new float[mapChunkSize, mapChunkSize];
+
+        if (temperatureMode == TemperatureMode.FallOffMap){
+            mapData = TemperatureMaps.GenerateFalloffMap(mapChunkSize);
+        } else if (temperatureMode == TemperatureMode.HighTemperatureRightWall){
+            mapData = TemperatureMaps.HighTemperatureWall(mapChunkSize);
+        }
+        return mapData;
     }
 
     public void IsingModelEvolve(){
@@ -76,7 +94,7 @@ public class MapGenerator : MonoBehaviour
         for (int iterations = 0; iterations < numIsingSteps; iterations++){
             float [,] mapCopy = (float[,])magMap.Clone();
             evolutionHistory.Add(iterations,mapCopy);
-            magMap = MagneticEvolution.IsingStep(magMap, temperature);
+            magMap = MagneticEvolution.IsingStep(magMap, TemperatureMap(), temperatureMultiplier);
         }
     }
 

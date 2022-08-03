@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MagneticEvolution : MonoBehaviour
 {
-    public static float[,] IsingStep(float[,] mapData, float temperature)
+    public static float[,] IsingStep(float[,] mapData, float[,] temperature, float temperatureMultiplier)
     {
         System.Random rnd = new System.Random();
         int N = mapData.GetLength(0);
@@ -23,7 +23,7 @@ public class MagneticEvolution : MonoBehaviour
                     {
                         s *= -1;
                     }
-                    else if ((float)rnd.NextDouble() < Mathf.Exp(-cost / temperature))
+                    else if ((float)rnd.NextDouble() < Mathf.Exp(-cost / (temperature[a, b] * temperatureMultiplier)))
                     {
                         s *= -1;
                     }
